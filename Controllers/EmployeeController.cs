@@ -27,6 +27,7 @@ public EmployeeController(IEmployeeRepository repo, IMapper mapper)
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
+
         var employees = await _repository.GetAllAsync();
         var result = _mapper.Map<List<EmployeeReadDto>>(employees);
         return Ok(result);
@@ -81,7 +82,7 @@ public EmployeeController(IEmployeeRepository repo, IMapper mapper)
         return NotFound();
 
         await _repository.DeleteAsync(id);
-        
+
         return NoContent();
 
     }

@@ -1,4 +1,5 @@
 using EmployeeApi.Data;
+using EmployeeApi.Middlewares;
 using EmployeeApi.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,12 +18,14 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 var app = builder.Build();
 
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
