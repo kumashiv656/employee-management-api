@@ -6,6 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 namespace EmployeeApi.Controllers
 {
     [AllowAnonymous]
@@ -22,23 +23,29 @@ namespace EmployeeApi.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody]LoginDto dto)
         { 
+            string role;
             if(dto == null)
             return BadRequest("invalid request");
             //temp : Replace with DB later
-            if(dto.Username != "Admin" || dto.Password != "1234")
+            if(dto.Username == "Admin" && dto.Password == "1234")
+            role = "Admin";
+            else if(dto.Username == "User" && dto.Password == "1234")
+            role = "User";
+            else 
+            
             return Unauthorized();
 
-            var token = GenerateToken(dto.Username);
+            var token = GenerateToken(dto.Username,role);
             return Ok(new{Token = token});
 
             
         }
-        private string GenerateToken(string Username)
+        private string GenerateToken(string Username,string role)
         {
             var claims = new[]
             {
               new Claim(ClaimTypes.Name , Username),
-              new Claim(ClaimTypes.Role , "Admin")  
+              new Claim(ClaimTypes.Role , role)  
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
 

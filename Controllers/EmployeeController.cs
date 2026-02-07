@@ -10,9 +10,11 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace EmployeeApi.Controllers;
 
-[Authorize]
+
 [ApiController]
 [Route ("api/[controller]")]
+[Authorize(Roles = "Admin,User")]
+
 public class EmployeeController : ControllerBase
 {
     private readonly IEmployeeRepository _repository;
@@ -25,7 +27,6 @@ public EmployeeController(IEmployeeRepository repo, IMapper mapper)
 }
 
     
-
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -61,23 +62,28 @@ public EmployeeController(IEmployeeRepository repo, IMapper mapper)
         );
 
     }
+   [Authorize(Roles = "Admin")]
     [HttpPut ("{id}")]
     public async Task<IActionResult> Update(int id,[FromBody]EmployeeUpdateDto dto)
     {    
-        if( id !=  dto.Id ) 
-            return BadRequest("id mismatch");
+
+
          var existing = await _repository.GetByIdAsync(id);
-         if(existing == null)
-         return NotFound();
+        if( existing == null ) 
+           return NotFound();
+         
+         
          _mapper.Map(dto,existing);
+         
 
         await _repository.UpdateAsync(existing);
         return NoContent();
 
     }
 
+   [Authorize(Roles = "Admin")]
      [HttpDelete ("{id}")]
-     public async Task<IActionResult> delete(int id)
+     public async Task<IActionResult> Delete(int id)
     {
         var existing = await _repository.GetByIdAsync(id);
         if(existing == null)

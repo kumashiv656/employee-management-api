@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +61,8 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey =true,
+
+        RoleClaimType = ClaimTypes.Role,
 
         ValidIssuer = jwtsettings["Issuer"],
         ValidAudience = jwtsettings["Audience"],
