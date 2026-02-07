@@ -1,4 +1,5 @@
 using EmployeeApi.Data;
+using EmployeeApi.DTOs;
 using EmployeeApi.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -14,10 +15,38 @@ public class EmployeeRepository : IEmployeeRepository
         _context= context;
     }
 
-    public async Task<IEnumerable<Employee>> GetAllAsync()
+   public async Task<(List<Employee>, int)> GetAllAsync(EmployeeQueryDto query)
+{
+    var employees = _context.Employees.AsQueryable();
+
+    // Filtering
+    if (!string.IsNullOrEmpty(query.Department))
     {
-        return await _context.Employees.ToListAsync();
+        employees = employees.Where(e => e.Department == query.Department);
     }
+
+    // Sorting
+    if (!string.IsNullOrEmpty(query.SortBy))
+    {
+        if (query.SortBy.ToLower() == "firstname")
+        {
+            employees = query.SortOrder == "desc"
+                ? employees.OrderByDescending(e => e.FirstName)
+                : employees.OrderBy(e => e.FirstName);
+        }
+    }
+
+    var totalCount = await employees.CountAsync();
+
+    // Pagination
+    var data = await employees
+        .Skip((query.Page - 1) * query.PageSize)
+        .Take(query.PageSize)
+        .ToListAsync();
+
+    return (data, totalCount);
+}
+
     public async Task<Employee?> GetByIdAsync(int id)
     {
         return await _context.Employees.FindAsync(id);

@@ -17,25 +17,38 @@ namespace EmployeeApi.Controllers;
 
 public class EmployeeController : ControllerBase
 {
+
+    private readonly ILogger<EmployeeController> _logger;
     private readonly IEmployeeRepository _repository;
     private readonly IMapper _mapper;
 
-public EmployeeController(IEmployeeRepository repo, IMapper mapper)
+public EmployeeController(IEmployeeRepository repo, IMapper mapper, ILogger<EmployeeController> logger)
 {
+    _logger = logger;
     _repository = repo;
     _mapper = mapper;
 }
 
     
     [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
+public async Task<IActionResult> GetAll([FromQuery] EmployeeQueryDto query)
+{
+    var (data, totalCount) = await _repository.GetAllAsync(query);
 
-        var employees = await _repository.GetAllAsync();
-        var result = _mapper.Map<List<EmployeeReadDto>>(employees);
-        return Ok(result);
-    }
-    [HttpGet("{id}")]
+    var result = _mapper.Map<List<EmployeeReadDto>>(data);
+
+    var response = new
+    {
+        TotalCount = totalCount,
+        Page = query.Page,
+        PageSize = query.PageSize,
+        TotalPages = (int)Math.Ceiling(totalCount / (double)query.PageSize),
+        Data = result
+    };
+
+    return Ok(response);
+}
+[HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
         var employee = await _repository.GetByIdAsync(id);

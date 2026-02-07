@@ -6,9 +6,26 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .WriteTo.Console(
+        outputTemplate:
+        "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}"
+    )
+    .WriteTo.File(
+        "Logs/log-.txt",
+        rollingInterval: RollingInterval.Day,
+        outputTemplate:
+        "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}"
+    )
+    .CreateLogger();
+
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseSerilog();
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -83,6 +100,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<CorrelationIdMiddleware>();
 
 app.UseHttpsRedirection();
 
