@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using EmployeeApi.DTOs;
 using Microsoft.Identity.Client;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EmployeeApi.Controllers;
 
+[Authorize]
 [ApiController]
 [Route ("api/[controller]")]
 public class EmployeeController : ControllerBase
